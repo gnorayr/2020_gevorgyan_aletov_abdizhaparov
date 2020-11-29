@@ -15,7 +15,7 @@ screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
 
 
 class Pendulum:
-    def __init__(self, h, a, dh, da, w=0.02, l=300, m=1, g=0.2):
+    def __init__(self, h, a, dh, da, k=0.02, l=300, m=1.0, g=0.2, b_a=0.0, b_h=0.0):
         """
 
         h: vertical displacement of the springs
@@ -24,15 +24,19 @@ class Pendulum:
         da: derivative of a
         d2h: second derivative of h
         d2a: second derivative of a
-        w: the spring constant divided by the mass of ball
+        k: the spring constant divided by the mass of the ball
         l: length of the rope
-        m: mass of the load
+        m: mass of the load divided by the mass of the ball
         g: acceleration of the free fall
+        b_a: dissipation coefficient of the ball
+        b_h: dissipation coefficient of the load
         """
-        self.w = w
+        self.k = k
         self.l = l
         self.m = m
         self.g = g
+        self.b_a = b_a
+        self.b_h = b_h
         self.h = h
         self.a = a
         self.dh = dh
@@ -41,9 +45,10 @@ class Pendulum:
         self.d2a = 0
 
     def move(self):
-        self.d2h = (self.g * sin(self.a) ** 2 - self.w * self.h - self.l * cos(self.a) * self.da ** 2) / \
-                   (cos(self.a) ** 2 + self.m)
-        self.d2a = -(self.g + self.d2h) * sin(self.a) / self.l
+        self.d2h = (self.g * sin(self.a) ** 2 - self.k * self.h - self.l * cos(self.a) * self.da ** 2 - self.dh * (
+                self.b_h + self.b_a * cos(self.a) ** 2)) / (cos(self.a) ** 2 + self.m)
+        self.d2a = -(self.g * sin(self.a) + self.d2h * sin(self.a) + self.b_a * (
+                    self.dh * sin(self.a) + self.da * self.l)) / self.l
         self.dh += self.d2h
         self.h += self.dh
         self.da += self.d2a
@@ -75,7 +80,7 @@ class Pendulum:
 clock = pygame.time.Clock()
 finished = False
 
-pendulum = Pendulum(h=0, a=0, dh=3, da=0.025, w=0.01, m=1)
+pendulum = Pendulum(h=0, a=0, dh=3, da=0.025, k=0.01, m=1, b_a=0.001, b_h=0.001)
 while not finished:
     clock.tick(FPS)
     pendulum.move()
