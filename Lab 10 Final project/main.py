@@ -2,16 +2,46 @@ from math import sin, cos
 
 import pygame
 from pygame.draw import *
+import time
 
 from my_colors import *
 
 pygame.init()
 
-FPS = 120
+FPS = 60
 SCREEN_X, SCREEN_Y = 1300, 600
 GROUND_Y = 19 * SCREEN_Y // 20
 
 screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
+
+
+class Game:
+    def __init__(self):
+        self.clock = pygame.time.Clock()
+        self.pendulum = Pendulum(h=0, a=0, dh=3.5, da=0.025, k=0.01, m=1, b_a=0.001, b_h=0.001)
+        self.graph = PendulumGraph(self.pendulum)
+
+    def mainloop(self):
+
+        finished = False
+
+        last_time = time.time()
+
+        while not finished:
+            self.pendulum.move()
+            now = time.time()
+            if now - last_time > 1 / FPS:
+                self.graph.ball()
+                self.graph.rope()
+                self.graph.load()
+                self.graph.spring(x=SCREEN_X / 3)
+                self.graph.spring(x=2 * SCREEN_X / 3)
+                last_time = time.time()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        finished = True
+                pygame.display.update()
+                screen.fill(WHITE)
 
 
 class Pendulum:
@@ -43,20 +73,29 @@ class Pendulum:
         self.da = da
         self.d2h = 0
         self.d2a = 0
+        self.last_time = time.time()
 
     def move(self):
+        now = time.time()
+        dt, self.last_time = now - self.last_time, time.time()
+        coef = 120 * dt
         self.d2h = (self.g * sin(self.a) ** 2 - self.k * self.h - self.l * cos(self.a) * self.da ** 2 - self.dh * (
                 self.b_h + self.b_a * cos(self.a) ** 2)) / (cos(self.a) ** 2 + self.m)
         self.d2a = -(self.g * sin(self.a) + self.d2h * sin(self.a) + self.b_a * (
-                    self.dh * sin(self.a) + self.da * self.l)) / self.l
-        self.dh += self.d2h
-        self.h += self.dh
-        self.da += self.d2a
-        self.a += self.da
+                self.dh * sin(self.a) + self.da * self.l)) / self.l
+        self.dh += self.d2h * coef
+        self.h += self.dh * coef
+        self.da += self.d2a * coef
+        self.a += self.da * coef
+
+
+class PendulumGraph:
+    def __init__(self, pendul):
+        self._p = pendul
 
     def spring(self, x=SCREEN_X / 2, width=20, n=10):
         y = 20
-        h = SCREEN_Y / 3 - self.h - 2 * y
+        h = SCREEN_Y / 3 - self._p.h - 2 * y
         line(screen, BLACK, (x, 0), (x, 20))
         line(screen, BLACK, (x, h + 40), (x, h + 20))
         for i in range(n):
@@ -66,33 +105,46 @@ class Pendulum:
             width = - width
 
     def load(self, height=5, width=SCREEN_X / 4):
-        rect(screen, BLACK,
-             (int(SCREEN_X / 2 - width), int(SCREEN_Y / 3 - self.h - height), int(2 * width), int(height)))
+        rect(
+            screen,
+            BLACK,
+            (
+                int(SCREEN_X / 2 - width),
+                int(SCREEN_Y / 3 - self._p.h - height),
+                int(2 * width),
+                int(height)
+            )
+        )
 
     def ball(self):
-        circle(screen, BLACK, (SCREEN_X / 2 + self.l * sin(self.a), SCREEN_Y / 3 - self.h + self.l * cos(self.a)), 10)
+        circle(
+            screen,
+            BLACK,
+            (
+                SCREEN_X / 2 + self._p.l * sin(self._p.a),
+                SCREEN_Y / 3 - self._p.h + self._p.l * cos(self._p.a)
+            ),
+            10
+        )
 
     def rope(self):
-        line(screen, BLACK, (SCREEN_X / 2 + self.l * sin(self.a), SCREEN_Y / 3 - self.h + self.l * cos(self.a)),
-             (SCREEN_X / 2, SCREEN_Y / 3 - self.h))
+        line(
+            screen,
+            BLACK,
+            (
+                SCREEN_X / 2 + self._p.l * sin(self._p.a),
+                SCREEN_Y / 3 - self._p.h + self._p.l * cos(self._p.a)
+            ),
+            (
+                SCREEN_X / 2,
+                SCREEN_Y / 3 - self._p.h
+            )
+        )
 
 
-clock = pygame.time.Clock()
-finished = False
-
-pendulum = Pendulum(h=0, a=0, dh=3, da=0.025, k=0.01, m=1, b_a=0.001, b_h=0.001)
-while not finished:
-    clock.tick(FPS)
-    pendulum.move()
-    pendulum.ball()
-    pendulum.rope()
-    pendulum.load()
-    pendulum.spring(x=SCREEN_X / 3)
-    pendulum.spring(x=2 * SCREEN_X / 3)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            finished = True
-    pygame.display.update()
-    screen.fill(WHITE)
-
-pygame.quit()
+if __name__ == "__main__":
+    try:
+        game = Game()
+        game.mainloop()
+    finally:
+        pygame.quit()
