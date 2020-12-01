@@ -1,8 +1,8 @@
-from math import sin, cos
+import time
+from math import sin, cos, asin, pi
 
 import pygame
 from pygame.draw import *
-import time
 
 from my_colors import *
 
@@ -17,19 +17,19 @@ screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
 
 class Game:
     def __init__(self):
-        self.clock = pygame.time.Clock()
-        self.pendulum = Pendulum(h=0, a=0, dh=3.5, da=0.025, k=0.01, m=1, b_a=0.001, b_h=0.001)
+        self.pendulum = Pendulum(h=0, a=0, dh=0, da=0, k=0.01, m=1, b_a=0.001, b_h=0.001)
         self.graph = PendulumGraph(self.pendulum)
 
     def mainloop(self):
-
         finished = False
-
         last_time = time.time()
 
         while not finished:
+            if pygame.mouse.get_pressed(5)[0]:
+                self.pendulum.mouse()
             self.pendulum.move()
             now = time.time()
+
             if now - last_time > 1 / FPS:
                 self.graph.ball()
                 self.graph.rope()
@@ -40,6 +40,10 @@ class Game:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         finished = True
+                    elif event.type == pygame.MOUSEBUTTONUP:
+                        self.pendulum.s = 1
+                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                        self.pendulum.starting_point()
                 pygame.display.update()
                 screen.fill(WHITE)
 
@@ -74,6 +78,7 @@ class Pendulum:
         self.d2h = 0
         self.d2a = 0
         self.last_time = time.time()
+        self.s = 1
 
     def move(self):
         now = time.time()
@@ -87,6 +92,25 @@ class Pendulum:
         self.h += self.dh * coef
         self.da += self.d2a * coef
         self.a += self.da * coef
+
+    def mouse(self):
+        x, y = pygame.mouse.get_pos()
+        if y > SCREEN_Y / 3 - self.h:
+            self.s = 1
+        else:
+            self.s = -1
+        if x > SCREEN_X / 2 + self.l:
+            self.a = pi / 2
+        elif x < SCREEN_X / 2 - self.l:
+            self.a = -pi / 2
+        else:
+            self.a = self.s * asin((x - SCREEN_X / 2) / self.l) + pi * (self.s - 1) / 2
+
+        self.h = -(y - SCREEN_Y / 3 - self.l * cos(self.a))
+        self.da, self.dh = 0, 0
+
+    def starting_point(self):
+        self.h, self.a, self.dh, self.da = 0, 0, 0, 0
 
 
 class PendulumGraph:
