@@ -19,6 +19,7 @@ class Game:
     def __init__(self):
         self.pendulum = Pendulum(h=0, a=0, dh=0, da=0, k=0.01, m=1, b_a=0.001, b_h=0.001)
         self.graph = PendulumGraph(self.pendulum)
+        self.font = pygame.font.SysFont('arial', 25, True)
 
     def mainloop(self):
         finished = False
@@ -41,15 +42,15 @@ class Game:
                     if event.type == pygame.QUIT:
                         finished = True
                     elif event.type == pygame.MOUSEBUTTONUP:
-                        self.pendulum.s = 1
+                        self.pendulum.higher = 1
                     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                        self.pendulum.starting_point()
+                        self.pendulum.equilibrium()
                 pygame.display.update()
                 screen.fill(WHITE)
 
 
 class Pendulum:
-    def __init__(self, h, a, dh, da, k=0.02, l=300, m=1.0, g=0.2, b_a=0.0, b_h=0.0):
+    def __init__(self, h, a, dh, da, k=0.02, length=300, m=1.0, g=0.2, b_a=0.0, b_h=0.0):
         """
 
         h: vertical displacement of the springs
@@ -59,14 +60,15 @@ class Pendulum:
         d2h: second derivative of h
         d2a: second derivative of a
         k: the spring constant divided by the mass of the ball
-        l: length of the rope
+        length: length of the rope
         m: mass of the load divided by the mass of the ball
         g: acceleration of the free fall
         b_a: dissipation coefficient of the ball
         b_h: dissipation coefficient of the load
+        higher: Bool, if True the ball is higher than the load
         """
         self.k = k
-        self.l = l
+        self.length = length
         self.m = m
         self.g = g
         self.b_a = b_a
@@ -78,44 +80,44 @@ class Pendulum:
         self.d2h = 0
         self.d2a = 0
         self.last_time = time.time()
-        self.s = 1
+        self.higher = 0
 
     def move(self):
         now = time.time()
         dt, self.last_time = now - self.last_time, time.time()
-        coef = 120 * dt
-        self.d2h = (self.g * sin(self.a) ** 2 - self.k * self.h - self.l * cos(self.a) * self.da ** 2 - self.dh * (
+        coefficient = 120 * dt
+        self.d2h = (self.g * sin(self.a) ** 2 - self.k * self.h - self.length * cos(self.a) * self.da ** 2 - self.dh * (
                 self.b_h + self.b_a * cos(self.a) ** 2)) / (cos(self.a) ** 2 + self.m)
         self.d2a = -(self.g * sin(self.a) + self.d2h * sin(self.a) + self.b_a * (
-                self.dh * sin(self.a) + self.da * self.l)) / self.l
-        self.dh += self.d2h * coef
-        self.h += self.dh * coef
-        self.da += self.d2a * coef
-        self.a += self.da * coef
+                self.dh * sin(self.a) + self.da * self.length)) / self.length
+        self.dh += self.d2h * coefficient
+        self.h += self.dh * coefficient
+        self.da += self.d2a * coefficient
+        self.a += self.da * coefficient
 
     def mouse(self):
         x, y = pygame.mouse.get_pos()
         if y > SCREEN_Y / 3 - self.h:
-            self.s = 1
+            self.higher = 0
         else:
-            self.s = -1
-        if x > SCREEN_X / 2 + self.l:
+            self.higher = 1
+        if x > SCREEN_X / 2 + self.length:
             self.a = pi / 2
-        elif x < SCREEN_X / 2 - self.l:
+        elif x < SCREEN_X / 2 - self.length:
             self.a = -pi / 2
         else:
-            self.a = self.s * asin((x - SCREEN_X / 2) / self.l) + pi * (self.s - 1) / 2
+            self.a = (1 - 2 * self.higher) * asin((x - SCREEN_X / 2) / self.length) + pi * self.higher
 
-        self.h = -(y - SCREEN_Y / 3 - self.l * cos(self.a))
+        self.h = -(y - SCREEN_Y / 3 - self.length * cos(self.a))
         self.da, self.dh = 0, 0
 
-    def starting_point(self):
+    def equilibrium(self):
         self.h, self.a, self.dh, self.da = 0, 0, 0, 0
 
 
 class PendulumGraph:
-    def __init__(self, pendul):
-        self._p = pendul
+    def __init__(self, other: Pendulum):
+        self._p = other
 
     def spring(self, x=SCREEN_X / 2, width=20, n=10):
         y = 20
@@ -145,8 +147,8 @@ class PendulumGraph:
             screen,
             BLACK,
             (
-                SCREEN_X / 2 + self._p.l * sin(self._p.a),
-                SCREEN_Y / 3 - self._p.h + self._p.l * cos(self._p.a)
+                SCREEN_X / 2 + self._p.length * sin(self._p.a),
+                SCREEN_Y / 3 - self._p.h + self._p.length * cos(self._p.a)
             ),
             10
         )
@@ -156,8 +158,8 @@ class PendulumGraph:
             screen,
             BLACK,
             (
-                SCREEN_X / 2 + self._p.l * sin(self._p.a),
-                SCREEN_Y / 3 - self._p.h + self._p.l * cos(self._p.a)
+                SCREEN_X / 2 + self._p.length * sin(self._p.a),
+                SCREEN_Y / 3 - self._p.h + self._p.length * cos(self._p.a)
             ),
             (
                 SCREEN_X / 2,
