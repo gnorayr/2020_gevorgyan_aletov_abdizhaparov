@@ -26,11 +26,14 @@ class Game:
         last_time = time.time()
 
         while not finished:
+            ok = True
+            
             if pygame.mouse.get_pressed(5)[0]:
                 self.pendulum.mouse()
             self.pendulum.move()
             now = time.time()
 
+            
             if now - last_time > 1 / FPS:
                 self.graph.ball()
                 self.graph.rope()
@@ -43,6 +46,32 @@ class Game:
                         finished = True
                     elif event.type == pygame.MOUSEBUTTONUP:
                         self.pendulum.higher = 1
+                    elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+                        rect(screen, GREY, (450,200,400,200))
+                        rect(screen, WHITE, (550,250,100,50))
+                        rect(screen, WHITE, (700, 250, 100, 50))
+                        while ok:
+                            self.pendulum.equilibrium()
+                            for event in pygame.event.get():
+                                if event.type == pygame.QUIT:
+                                    ok = False
+                                elif event.type == pygame.MOUSEBUTTONDOWN:
+                                    if ((event.pos[0] - 550 < 100) and  (event.pos[0] - 550 > 0) and
+                                        (event.pos[1] - 250 < 50) and (event.pos[1] - 250 > 0)):
+                                        ok = False
+                                        self.pendulum.m = 2
+                                    elif ((event.pos[0] - 700 < 100) and  (event.pos[0] - 700 > 0) and
+                                        (event.pos[1] - 250 < 50) and (event.pos[1] - 250 > 0)):
+                                        ok = False
+                                        self.pendulum.k = 5
+                                    
+                                        
+                            pygame.display.update()
+                            
+                            
+
+
+
                     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                         self.pendulum.equilibrium()
                 pygame.display.update()
@@ -147,8 +176,8 @@ class PendulumGraph:
             screen,
             BLACK,
             (
-                SCREEN_X / 2 + self._p.length * sin(self._p.a),
-                SCREEN_Y / 3 - self._p.h + self._p.length * cos(self._p.a)
+                int(SCREEN_X / 2 + self._p.length * sin(self._p.a)),
+                int(SCREEN_Y / 3 - self._p.h + self._p.length * cos(self._p.a))
             ),
             10
         )
@@ -174,3 +203,5 @@ if __name__ == "__main__":
         game.mainloop()
     finally:
         pygame.quit()
+
+
