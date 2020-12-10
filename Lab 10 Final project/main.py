@@ -32,6 +32,7 @@ class Game:
                 screen.fill(GREY)
                 self.menu.lil_windows()
                 self.menu.text_for_lil_windows()
+                self.menu.start_button_graph()
                 pygame.display.update()
             else:
                 if pygame.mouse.get_pressed(5)[0]:
@@ -57,8 +58,11 @@ class Game:
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
                     menu_is_open = not menu_is_open
 
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                    self.pendulum.equilibrium()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 3:
+                        self.pendulum.equilibrium()
+                    if menu_is_open and self.menu.start_button_check(event.pos[0], event.pos[1]):
+                        menu_is_open = not menu_is_open
 
 
 class Pendulum:
@@ -203,11 +207,11 @@ class Menu:
             (self._p.b_h * 10000, "b_h")
         ]
         self.start_x = SCREEN_X / 12
-        self.start_y = 1 * SCREEN_Y / 2
+        self.start_y = 3 * SCREEN_Y / 5
         self.x = self.start_x
         self.y = self.start_y
-        self.step_x = 150
-        self.step_y = 50
+        self.side_x = 150
+        self.side_y = 35
 
     def lil_windows(self):
         for j in range(2):
@@ -216,19 +220,19 @@ class Menu:
                     screen,
                     WHITE,
                     [
-                        self.x + self.step_x / 2,
-                        self.y, self.step_x, self.step_y
+                        self.x + self.side_x / 2,
+                        self.y, self.side_x, self.side_y
                     ]
                 )
                 line(
                     screen,
                     RED,
                     (
-                        self.x + 7 * self.step_x / 10,
+                        self.x + 7 * self.side_x / 10,
                         self.y + 13
                     ),
                     (
-                        self.x + 13 * self.step_x / 10,
+                        self.x + 13 * self.side_x / 10,
                         self.y + 13
                     )
                 )
@@ -236,27 +240,27 @@ class Menu:
                     screen,
                     RED,
                     (
-                        self.x + 7 * self.step_x / 10,
+                        self.x + 7 * self.side_x / 10,
                         self.y
                     ),
                     (
-                        self.x + 7 * self.step_x / 10,
-                        self.y + self.step_y
+                        self.x + 7 * self.side_x / 10,
+                        self.y + self.side_y
                     )
                 )
                 line(
                     screen,
                     RED,
                     (
-                        self.x + 13 * self.step_x / 10,
+                        self.x + 13 * self.side_x / 10,
                         self.y
                     ),
-                    (self.x + 13 * self.step_x / 10,
-                     self.y + self.step_y
+                    (self.x + 13 * self.side_x / 10,
+                     self.y + self.side_y
                      )
                 )
-                self.x += (SCREEN_X - 2 * self.step_x) / 5
-            self.y += 2 * self.step_y
+                self.x += (SCREEN_X - 2 * self.side_x) / 5
+            self.y += 2 * self.side_y
             self.x = self.start_x
         self.x = self.start_x
         self.y = self.start_y
@@ -270,13 +274,13 @@ class Menu:
                 text_3 = self.font.render(">", True, RED)
                 text_4 = self.font.render("<", True, RED)
 
-                screen.blit(text_4, text_4.get_rect(center=(self.x + 6 * self.step_x / 10, self.y + self.step_y / 2)))
-                screen.blit(text_3, text_3.get_rect(center=(self.x + 14 * self.step_x / 10, self.y + self.step_y / 2)))
-                screen.blit(text_1, text_1.get_rect(center=(self.x + self.step_x, self.y + self.step_y / 2)))
-                screen.blit(text_2, text_2.get_rect(center=(self.x + self.step_x, self.y + 5)))
-                self.x += (SCREEN_X - 2 * self.step_x) / 5
+                screen.blit(text_4, text_4.get_rect(center=(self.x + 6 * self.side_x / 10, self.y + self.side_y / 2)))
+                screen.blit(text_3, text_3.get_rect(center=(self.x + 14 * self.side_x / 10, self.y + self.side_y / 2)))
+                screen.blit(text_1, text_1.get_rect(center=(self.x + self.side_x, self.y + self.side_y / 2 + 8)))
+                screen.blit(text_2, text_2.get_rect(center=(self.x + self.side_x, self.y + 5)))
+                self.x += (SCREEN_X - 2 * self.side_x) / 5
 
-            self.y += 2 * self.step_y
+            self.y += 2 * self.side_y
             self.x = self.start_x
 
             param = self.parameters_2
@@ -299,8 +303,15 @@ class Menu:
             (self._p.b_h * 10000, "b_h")
         ]
 
-    def start_button(self):
-        pass
+    def start_button_graph(self):
+        font = pygame.font.SysFont('arial', 50, True)
+        rect(screen, RED, [SCREEN_X / 2 - self.side_x, 8 * SCREEN_Y / 10, 2 * self.side_x, 2.5 * self.side_y])
+        text_4 = font.render("START", True, WHITE)
+        screen.blit(text_4, text_4.get_rect(center=(SCREEN_X / 2, 8 * SCREEN_Y / 10 + 1.25 * self.side_y)))
+
+    def start_button_check(self, mouse_x, mouse_y):
+        return 0 < mouse_x - (SCREEN_X / 2 - self.side_x) < 2 * self.side_x and \
+               0 < mouse_y - (8 * SCREEN_Y / 10) < 2.5 * self.side_y
 
     """
         rect(screen, WHITE, (550, 250, 100, 50))
