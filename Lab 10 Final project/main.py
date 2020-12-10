@@ -17,69 +17,52 @@ screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
 
 class Game:
     def __init__(self):
-        self.pendulum = Pendulum(h=0, a=0, dh=0, da=0, k=0.01, m=1, b_a=0.001, b_h=0.001)
+        self.pendulum = Pendulum(h=0, a=0, dh=1.0, da=10.0, k=10.0, m=2.0, b_a=10, b_h=10)
         self.graph = PendulumGraph(self.pendulum)
-        self.font = pygame.font.SysFont('arial', 25, True)
+        self.menu = Menu(self.pendulum)
 
     def mainloop(self):
         finished = False
         last_time = time.time()
+        menu_is_open = True
 
         while not finished:
-            ok = True
-            
-            if pygame.mouse.get_pressed(5)[0]:
-                self.pendulum.mouse()
-            self.pendulum.move()
-            now = time.time()
-
-            
-            if now - last_time > 1 / FPS:
-                self.graph.ball()
-                self.graph.rope()
-                self.graph.load()
-                self.graph.spring(x=SCREEN_X / 3)
-                self.graph.spring(x=2 * SCREEN_X / 3)
-                last_time = time.time()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        finished = True
-                    elif event.type == pygame.MOUSEBUTTONUP:
-                        self.pendulum.higher = 1
-                    elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
-                        rect(screen, GREY, (450,200,400,200))
-                        rect(screen, WHITE, (550,250,100,50))
-                        rect(screen, WHITE, (700, 250, 100, 50))
-                        while ok:
-                            self.pendulum.equilibrium()
-                            for event in pygame.event.get():
-                                if event.type == pygame.QUIT:
-                                    ok = False
-                                elif event.type == pygame.MOUSEBUTTONDOWN:
-                                    if ((event.pos[0] - 550 < 100) and  (event.pos[0] - 550 > 0) and
-                                        (event.pos[1] - 250 < 50) and (event.pos[1] - 250 > 0)):
-                                        ok = False
-                                        self.pendulum.m = 2
-                                    elif ((event.pos[0] - 700 < 100) and  (event.pos[0] - 700 > 0) and
-                                        (event.pos[1] - 250 < 50) and (event.pos[1] - 250 > 0)):
-                                        ok = False
-                                        self.pendulum.k = 5
-                                    
-                                        
-                            pygame.display.update()
-                            
-                            
-
-
-
-                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                        self.pendulum.equilibrium()
+            self.pendulum.time()
+            if menu_is_open:
+                screen.fill(GREY)
+                self.menu.lil_windows()
+                self.menu.text_for_lil_windows()
                 pygame.display.update()
-                screen.fill(WHITE)
+            else:
+                if pygame.mouse.get_pressed(5)[0]:
+                    self.pendulum.mouse()
+                self.pendulum.move()
+                now = time.time()
+
+                if now - last_time > 1 / FPS:
+                    self.graph.ball()
+                    self.graph.rope()
+                    self.graph.load()
+                    self.graph.spring(x=SCREEN_X / 3)
+                    self.graph.spring(x=2 * SCREEN_X / 3)
+                    last_time = time.time()
+                    pygame.display.update()
+                    screen.fill(WHITE)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    finished = True
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    self.pendulum.higher = 1
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+                    menu_is_open = not menu_is_open
+
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                    self.pendulum.equilibrium()
 
 
 class Pendulum:
-    def __init__(self, h, a, dh, da, k=0.02, length=300, m=1.0, g=0.2, b_a=0.0, b_h=0.0):
+    def __init__(self, h, a, dh, da, k=10.0, length=30.0, m=1.0, g=10.0, b_a=10.0, b_h=10.0):
         """
 
         h: vertical displacement of the springs
@@ -96,33 +79,37 @@ class Pendulum:
         b_h: dissipation coefficient of the load
         higher: Bool, if True the ball is higher than the load
         """
-        self.k = k
-        self.length = length
+        self.k = k / 1000
+        self.length = length * 10
         self.m = m
-        self.g = g
-        self.b_a = b_a
-        self.b_h = b_h
-        self.h = h
-        self.a = a
-        self.dh = dh
-        self.da = da
+        self.g = g / 50
+        self.b_a = b_a / 10000
+        self.b_h = b_h / 10000
+        self.h = h * 10
+        self.a = a / 10
+        self.dh = dh / 2
+        self.da = da / 200
         self.d2h = 0
         self.d2a = 0
         self.last_time = time.time()
+        self.dt = 0
+        self.coefficient = 120 * self.dt
         self.higher = 0
 
-    def move(self):
+    def time(self):
         now = time.time()
-        dt, self.last_time = now - self.last_time, time.time()
-        coefficient = 120 * dt
+        self.dt, self.last_time = now - self.last_time, time.time()
+        self.coefficient = 120 * self.dt
+
+    def move(self):
         self.d2h = (self.g * sin(self.a) ** 2 - self.k * self.h - self.length * cos(self.a) * self.da ** 2 - self.dh * (
                 self.b_h + self.b_a * cos(self.a) ** 2)) / (cos(self.a) ** 2 + self.m)
         self.d2a = -(self.g * sin(self.a) + self.d2h * sin(self.a) + self.b_a * (
                 self.dh * sin(self.a) + self.da * self.length)) / self.length
-        self.dh += self.d2h * coefficient
-        self.h += self.dh * coefficient
-        self.da += self.d2a * coefficient
-        self.a += self.da * coefficient
+        self.dh += self.d2h * self.coefficient
+        self.h += self.dh * self.coefficient
+        self.da += self.d2a * self.coefficient
+        self.a += self.da * self.coefficient
 
     def mouse(self):
         x, y = pygame.mouse.get_pos()
@@ -197,11 +184,144 @@ class PendulumGraph:
         )
 
 
+class Menu:
+    def __init__(self, other: Pendulum):
+        self.font = pygame.font.SysFont('arial', 15, True)
+        self._p = other
+        self.parameters_1 = [
+            (self._p.h / 10, "h"),
+            (self._p.a * 10, "a"),
+            (self._p.dh * 2, "dh"),
+            (self._p.da * 200, "da"),
+            (self._p.k * 1000, "k")
+        ]
+        self.parameters_2 = [
+            (self._p.length / 10, "length"),
+            (self._p.m, "m"),
+            (self._p.g * 50, "g"),
+            (self._p.b_a * 10000, "b_a"),
+            (self._p.b_h * 10000, "b_h")
+        ]
+        self.start_x = SCREEN_X / 12
+        self.start_y = 1 * SCREEN_Y / 2
+        self.x = self.start_x
+        self.y = self.start_y
+        self.step_x = 150
+        self.step_y = 50
+
+    def lil_windows(self):
+        for j in range(2):
+            for i in range(5):
+                rect(
+                    screen,
+                    WHITE,
+                    [
+                        self.x + self.step_x / 2,
+                        self.y, self.step_x, self.step_y
+                    ]
+                )
+                line(
+                    screen,
+                    RED,
+                    (
+                        self.x + 7 * self.step_x / 10,
+                        self.y + 13
+                    ),
+                    (
+                        self.x + 13 * self.step_x / 10,
+                        self.y + 13
+                    )
+                )
+                line(
+                    screen,
+                    RED,
+                    (
+                        self.x + 7 * self.step_x / 10,
+                        self.y
+                    ),
+                    (
+                        self.x + 7 * self.step_x / 10,
+                        self.y + self.step_y
+                    )
+                )
+                line(
+                    screen,
+                    RED,
+                    (
+                        self.x + 13 * self.step_x / 10,
+                        self.y
+                    ),
+                    (self.x + 13 * self.step_x / 10,
+                     self.y + self.step_y
+                     )
+                )
+                self.x += (SCREEN_X - 2 * self.step_x) / 5
+            self.y += 2 * self.step_y
+            self.x = self.start_x
+        self.x = self.start_x
+        self.y = self.start_y
+
+    def text_for_lil_windows(self):
+        param = self.parameters_1
+        for j in range(2):
+            for value, name in param:
+                text_1 = self.font.render(str(round(value, 2)), True, RED)
+                text_2 = self.font.render(str(name), True, RED)
+                text_3 = self.font.render(">", True, RED)
+                text_4 = self.font.render("<", True, RED)
+
+                screen.blit(text_4, text_4.get_rect(center=(self.x + 6 * self.step_x / 10, self.y + self.step_y / 2)))
+                screen.blit(text_3, text_3.get_rect(center=(self.x + 14 * self.step_x / 10, self.y + self.step_y / 2)))
+                screen.blit(text_1, text_1.get_rect(center=(self.x + self.step_x, self.y + self.step_y / 2)))
+                screen.blit(text_2, text_2.get_rect(center=(self.x + self.step_x, self.y + 5)))
+                self.x += (SCREEN_X - 2 * self.step_x) / 5
+
+            self.y += 2 * self.step_y
+            self.x = self.start_x
+
+            param = self.parameters_2
+
+        self.x = self.start_x
+        self.y = self.start_y
+
+        self.parameters_1 = [
+            (self._p.h / 10, "h"),
+            (self._p.a * 10, "a"),
+            (self._p.dh * 2, "dh"),
+            (self._p.da * 200, "da"),
+            (self._p.k * 1000, "k")
+        ]
+        self.parameters_2 = [
+            (self._p.length / 10, "length"),
+            (self._p.m, "m"),
+            (self._p.g * 50, "g"),
+            (self._p.b_a * 10000, "b_a"),
+            (self._p.b_h * 10000, "b_h")
+        ]
+
+    def start_button(self):
+        pass
+
+    """
+        rect(screen, WHITE, (550, 250, 100, 50))
+        rect(screen, WHITE, (700, 250, 100, 50))
+        ok = True
+        while ok:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if ((event.pos[0] - 550 < 100) and (event.pos[0] - 550 > 0) and
+                            (event.pos[1] - 250 < 50) and (event.pos[1] - 250 > 0)):
+                        ok = False
+                        self._p.m = 2
+                    elif ((event.pos[0] - 700 < 100) and (event.pos[0] - 700 > 0) and
+                          (event.pos[1] - 250 < 50) and (event.pos[1] - 250 > 0)):
+                        ok = False
+                        self._p.k = 5"""
+
+
 if __name__ == "__main__":
     try:
         game = Game()
         game.mainloop()
     finally:
         pygame.quit()
-
-
