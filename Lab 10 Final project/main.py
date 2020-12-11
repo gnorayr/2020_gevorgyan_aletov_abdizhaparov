@@ -55,14 +55,61 @@ class Game:
                     finished = True
                 elif event.type == pygame.MOUSEBUTTONUP:
                     self.pendulum.higher = 1
+                    if menu_is_open and self.menu.start_button_check(event.pos[0], event.pos[1]):
+                        menu_is_open = not menu_is_open
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
                     menu_is_open = not menu_is_open
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 3:
                         self.pendulum.equilibrium()
-                    if menu_is_open and self.menu.start_button_check(event.pos[0], event.pos[1]):
-                        menu_is_open = not menu_is_open
+
+            if pygame.mouse.get_pressed(3)[0]:
+                if menu_is_open and self.menu.up_buttons_check(event.pos[0], event.pos[1]):
+                    if self.menu.up_window_number == 1:
+                        self.pendulum.h += 5 / 150
+                    elif self.menu.up_window_number == 2:
+                        self.pendulum.a += pi / 18 / 150
+                    elif self.menu.up_window_number == 3:
+                        self.pendulum.dh += 0.5 / 150
+                    elif self.menu.up_window_number == 4:
+                        self.pendulum.da += 0.005 / 150
+                    elif self.menu.up_window_number == 5:
+                        self.pendulum.k += 0.0015 / 150
+                    elif self.menu.up_window_number == 6:
+                        self.pendulum.length += 15 / 150
+                    elif self.menu.up_window_number == 7:
+                        self.pendulum.m += 0.1 / 25
+                    elif self.menu.up_window_number == 8:
+                        self.pendulum.g += 0.01 / 75
+                    elif self.menu.up_window_number == 9:
+                        self.pendulum.b_a += 0.0001 / 150
+                    elif self.menu.up_window_number == 10:
+                        self.pendulum.b_h += 0.0001 / 150
+                    self.menu.up_window_number = 0
+                if menu_is_open and self.menu.down_buttons_check(event.pos[0], event.pos[1]):
+                    if self.menu.down_window_number == 1:
+                        self.pendulum.h -= 5 / 150
+                    elif self.menu.down_window_number == 2:
+                        self.pendulum.a -= pi / 18 / 150
+                    elif self.menu.down_window_number == 3:
+                        self.pendulum.dh -= 0.5 / 150
+                    elif self.menu.down_window_number == 4:
+                        self.pendulum.da -= 0.005 / 150
+                    elif self.menu.down_window_number == 5:
+                        self.pendulum.k -= 0.0015 / 150
+                    elif self.menu.down_window_number == 6:
+                        self.pendulum.length -= 15 / 150
+                    elif self.menu.down_window_number == 7:
+                        self.pendulum.m -= 0.1 / 25
+                    elif self.menu.down_window_number == 8:
+                        self.pendulum.g -= 0.01 / 75
+                    elif self.menu.down_window_number == 9:
+                        self.pendulum.b_a -= 0.0001 / 150
+                    elif self.menu.down_window_number == 10:
+                        self.pendulum.b_h -= 0.0001 / 150
+                    self.menu.down_window_number = 0
+
 
 
 class Pendulum:
@@ -90,7 +137,7 @@ class Pendulum:
         self.b_a = b_a / 10000
         self.b_h = b_h / 10000
         self.h = h * 10
-        self.a = a / 10
+        self.a = a / (180/pi)
         self.dh = dh / 2
         self.da = da / 200
         self.d2h = 0
@@ -132,7 +179,8 @@ class Pendulum:
         self.da, self.dh = 0, 0
 
     def equilibrium(self):
-        self.h, self.a, self.dh, self.da = 0, 0, 0, 0
+        self.h, self.a, self.dh, self.da, self.k = 0, 0, 0, 0, 0.01
+        self.m, self.g, self.length, self.b_a, self.b_h = 2.0, 0.2, 300, 0.001, 0.001
 
 
 class PendulumGraph:
@@ -191,6 +239,8 @@ class PendulumGraph:
 class Menu:
     def __init__(self, other: Pendulum):
         self.font = pygame.font.SysFont('arial', 15, True)
+        self.up_window_number = 0
+        self.down_window_number = 0
         self._p = other
         self.parameters_1 = [
             (self._p.h / 10, "h"),
@@ -269,7 +319,7 @@ class Menu:
         param = self.parameters_1
         for j in range(2):
             for value, name in param:
-                text_1 = self.font.render(str(round(value, 2)), True, RED)
+                text_1 = self.font.render(str(round(value, 1)), True, RED)
                 text_2 = self.font.render(str(name), True, RED)
                 text_3 = self.font.render(">", True, RED)
                 text_4 = self.font.render("<", True, RED)
@@ -290,7 +340,7 @@ class Menu:
 
         self.parameters_1 = [
             (self._p.h / 10, "h"),
-            (self._p.a * 10, "a"),
+            (self._p.a * 180/pi, "a"),
             (self._p.dh * 2, "dh"),
             (self._p.da * 200, "da"),
             (self._p.k * 1000, "k")
@@ -313,21 +363,37 @@ class Menu:
         return 0 < mouse_x - (SCREEN_X / 2 - self.side_x) < 2 * self.side_x and \
                0 < mouse_y - (8 * SCREEN_Y / 10) < 2.5 * self.side_y
 
-    """
-        rect(screen, WHITE, (550, 250, 100, 50))
-        rect(screen, WHITE, (700, 250, 100, 50))
-        ok = True
-        while ok:
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if ((event.pos[0] - 550 < 100) and (event.pos[0] - 550 > 0) and
-                            (event.pos[1] - 250 < 50) and (event.pos[1] - 250 > 0)):
-                        ok = False
-                        self._p.m = 2
-                    elif ((event.pos[0] - 700 < 100) and (event.pos[0] - 700 > 0) and
-                          (event.pos[1] - 250 < 50) and (event.pos[1] - 250 > 0)):
-                        ok = False
-                        self._p.k = 5"""
+    def up_buttons_check(self, mouse_x, mouse_y):
+        a = 1
+        for j in range(2):
+            for i in range(5):
+                if 0 < mouse_x - (self.x + 13 * self.side_x / 10) < 2 * self.side_x / 10 and \
+                        0 < mouse_y - self.y < self.side_y:
+                    self.up_window_number = a
+                a += 1
+                self.x += (SCREEN_X - 2 * self.side_x) / 5
+            self.y += 2 * self.side_y
+            self.x = self.start_x
+        self.x = self.start_x
+        self.y = self.start_y
+
+        return self.up_window_number
+
+    def down_buttons_check(self, mouse_x, mouse_y):
+        a = 1
+        for j in range(2):
+            for i in range(5):
+                if 0 < mouse_x - (self.x + self.side_x / 2) < 2 * self.side_x / 10 and \
+                        0 < mouse_y - self.y < self.side_y:
+                    self.down_window_number = a
+                a += 1
+                self.x += (SCREEN_X - 2 * self.side_x) / 5
+            self.y += 2 * self.side_y
+            self.x = self.start_x
+        self.x = self.start_x
+        self.y = self.start_y
+
+        return self.down_window_number
 
 
 if __name__ == "__main__":
