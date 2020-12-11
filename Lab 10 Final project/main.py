@@ -15,9 +15,9 @@ GROUND_Y = 19 * SCREEN_Y // 20
 screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
 
 
-class Game:
+class Simulator:
     def __init__(self):
-        self.pendulum = Pendulum(h=0, a=0, dh=1.0, da=10.0, k=10.0, m=2.0, b_a=10, b_h=10)
+        self.pendulum = Pendulum(h=0, a=0, dh=0.0, da=0.0, k=10.0, m=2.0, b_a=10, b_h=10)
         self.graph = PendulumGraph(self.pendulum)
         self.menu = Menu(self.pendulum)
 
@@ -33,6 +33,7 @@ class Game:
                 self.menu.lil_windows()
                 self.menu.text_for_lil_windows()
                 self.menu.start_button_graph()
+                self.menu.text()
                 pygame.display.update()
             else:
                 if pygame.mouse.get_pressed(5)[0]:
@@ -57,8 +58,11 @@ class Game:
                     self.pendulum.higher = 1
                     if menu_is_open and self.menu.start_button_check(event.pos[0], event.pos[1]):
                         menu_is_open = not menu_is_open
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
-                    menu_is_open = not menu_is_open
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_TAB:
+                        menu_is_open = not menu_is_open
+                    if event.key == pygame.K_ESCAPE:
+                        finished = True
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 3:
@@ -67,56 +71,56 @@ class Game:
             if pygame.mouse.get_pressed(3)[0]:
                 if menu_is_open and self.menu.up_buttons_check(event.pos[0], event.pos[1]):
                     if self.menu.up_window_number == 1:
-                        self.pendulum.h += 5 / 150
+                        self.pendulum.h += 5 / 30
                     elif self.menu.up_window_number == 2:
                         self.pendulum.a += pi / 18 / 150
                     elif self.menu.up_window_number == 3:
-                        self.pendulum.dh += 0.5 / 150
+                        self.pendulum.dh += 0.5 / 75
                     elif self.menu.up_window_number == 4:
-                        self.pendulum.da += 0.005 / 150
+                        self.pendulum.da += 0.005 / 75
                     elif self.menu.up_window_number == 5:
-                        self.pendulum.k += 0.0015 / 150
+                        self.pendulum.k += 0.0015 / 50
                     elif self.menu.up_window_number == 6:
-                        self.pendulum.length += 15 / 150
+                        self.pendulum.length += 15 / 50
                     elif self.menu.up_window_number == 7:
-                        self.pendulum.m += 0.1 / 25
+                        self.pendulum.m += 0.1 / 10
                     elif self.menu.up_window_number == 8:
-                        self.pendulum.g += 0.01 / 75
+                        self.pendulum.g += 0.01 / 30
                     elif self.menu.up_window_number == 9:
-                        self.pendulum.b_a += 0.0001 / 150
+                        self.pendulum.b_a += 0.0001 / 50
                     elif self.menu.up_window_number == 10:
-                        self.pendulum.b_h += 0.0001 / 150
+                        self.pendulum.b_h += 0.0001 / 50
                     self.menu.up_window_number = 0
+
                 if menu_is_open and self.menu.down_buttons_check(event.pos[0], event.pos[1]):
                     if self.menu.down_window_number == 1:
-                        self.pendulum.h -= 5 / 150
+                        self.pendulum.h -= 5 / 30
                     elif self.menu.down_window_number == 2:
                         self.pendulum.a -= pi / 18 / 150
                     elif self.menu.down_window_number == 3:
-                        self.pendulum.dh -= 0.5 / 150
+                        self.pendulum.dh -= 0.5 / 75
                     elif self.menu.down_window_number == 4:
-                        self.pendulum.da -= 0.005 / 150
+                        self.pendulum.da -= 0.005 / 75
                     elif self.menu.down_window_number == 5:
-                        self.pendulum.k -= 0.0015 / 150
+                        self.pendulum.k -= 0.0015 / 50
                     elif self.menu.down_window_number == 6:
-                        self.pendulum.length -= 15 / 150
+                        self.pendulum.length -= 15 / 50
                     elif self.menu.down_window_number == 7:
-                        self.pendulum.m -= 0.1 / 25
+                        self.pendulum.m -= 0.1 / 10
                     elif self.menu.down_window_number == 8:
-                        self.pendulum.g -= 0.01 / 75
+                        self.pendulum.g -= 0.01 / 30
                     elif self.menu.down_window_number == 9:
-                        self.pendulum.b_a -= 0.0001 / 150
+                        self.pendulum.b_a -= 0.0001 / 50
                     elif self.menu.down_window_number == 10:
-                        self.pendulum.b_h -= 0.0001 / 150
+                        self.pendulum.b_h -= 0.0001 / 50
                     self.menu.down_window_number = 0
-
 
 
 class Pendulum:
     def __init__(self, h, a, dh, da, k=10.0, length=30.0, m=1.0, g=10.0, b_a=10.0, b_h=10.0):
         """
 
-        h: vertical displacement of the springs
+        h: vertical displacement of the load
         a: angular displacement of the pendulum
         dh: derivative of h
         da: derivative of a
@@ -137,7 +141,7 @@ class Pendulum:
         self.b_a = b_a / 10000
         self.b_h = b_h / 10000
         self.h = h * 10
-        self.a = a / (180/pi)
+        self.a = a / (180 / pi)
         self.dh = dh / 2
         self.da = da / 200
         self.d2h = 0
@@ -340,7 +344,7 @@ class Menu:
 
         self.parameters_1 = [
             (self._p.h / 10, "h"),
-            (self._p.a * 180/pi, "a"),
+            (self._p.a * 180 / pi, "a"),
             (self._p.dh * 2, "dh"),
             (self._p.da * 200, "da"),
             (self._p.k * 1000, "k")
@@ -395,10 +399,64 @@ class Menu:
 
         return self.down_window_number
 
+    def text(self):
+        font = pygame.font.SysFont('arial', 20, True)
+
+        text_1 = font.render("This is a simulator of pendulum with rope and spring.", True, WHITE)
+        text_2 = font.render(
+            "You can change positions, velocities, masses, and dissipation coefficient of ball and load,"
+            " also you can change spring constant and acceleration of the free fall.",
+            True,
+            WHITE
+        )
+        text_3 = font.render(
+            "Besides changing in menu you can change position of ball with holding left click.",
+            True,
+            WHITE
+        )
+        text_4 = font.render(
+            "You can drop variables to their defaults with right click (works both in the menu and not in the menu).",
+            True,
+            WHITE
+        )
+        text_15 = font.render(
+            "You can enter and quit the menu by pressing TAB and you can close the simulator by pressing ESQ.",
+            True,
+            WHITE
+        )
+
+        text_5 = font.render("h: vertical displacement of the load.", True, WHITE)
+        text_6 = font.render("a: angular displacement of the pendulum (in angle)", True, WHITE)
+        text_7 = font.render("dh: derivative of h.", True, WHITE)
+        text_8 = font.render("da: derivative of a.", True, WHITE)
+        text_9 = font.render("k: the spring constant divided by the mass of the ball.", True, WHITE)
+        text_10 = font.render("length: length of the rope.", True, WHITE)
+        text_11 = font.render("m: mass of the load divided by the mass of the ball.", True, WHITE)
+        text_12 = font.render("g: acceleration of the free fall.", True, WHITE)
+        text_13 = font.render("b_a: dissipation coefficient of the ball.", True, WHITE)
+        text_14 = font.render("b_h: dissipation coefficient of the load.", True, WHITE)
+
+        screen.blit(text_1, text_1.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30)))
+        screen.blit(text_2, text_2.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 25)))
+        screen.blit(text_3, text_3.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 50)))
+        screen.blit(text_4, text_4.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 75)))
+        screen.blit(text_15, text_15.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 100)))
+
+        screen.blit(text_5, (SCREEN_X // 7, SCREEN_Y // 3))
+        screen.blit(text_6, (SCREEN_X // 7, SCREEN_Y // 3 + 20))
+        screen.blit(text_7, (SCREEN_X // 7, SCREEN_Y // 3 + 40))
+        screen.blit(text_8, (SCREEN_X // 7, SCREEN_Y // 3 + 60))
+        screen.blit(text_9, (SCREEN_X // 7, SCREEN_Y // 3 + 80))
+        screen.blit(text_10, (4 * SCREEN_X // 7, SCREEN_Y // 3))
+        screen.blit(text_11, (4 * SCREEN_X // 7, SCREEN_Y // 3 + 20))
+        screen.blit(text_12, (4 * SCREEN_X // 7, SCREEN_Y // 3 + 40))
+        screen.blit(text_13, (4 * SCREEN_X // 7, SCREEN_Y // 3 + 60))
+        screen.blit(text_14, (4 * SCREEN_X // 7, SCREEN_Y // 3 + 80))
+
 
 if __name__ == "__main__":
     try:
-        game = Game()
+        game = Simulator()
         game.mainloop()
     finally:
         pygame.quit()
