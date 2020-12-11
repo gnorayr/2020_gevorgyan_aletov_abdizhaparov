@@ -183,7 +183,7 @@ class Pendulum:
         self.da, self.dh = 0, 0
 
     def equilibrium(self):
-        self.h, self.a, self.dh, self.da, self.k = 0, 0, 0, 0, 0.01
+        self.h, self.a, self.dh, self.da, self.k = 0.0, 0.0, 0.0, 0.0, 0.01
         self.m, self.g, self.length, self.b_a, self.b_h = 2.0, 0.2, 300, 0.001, 0.001
 
 
@@ -402,31 +402,35 @@ class Menu:
     def text(self):
         font = pygame.font.SysFont('arial', 20, True)
 
-        text_1 = font.render("This is a simulator of pendulum with rope and spring.", True, WHITE)
+        text_1 = font.render("This is a simulator of a pendulum with a rope and a spring.", True, WHITE)
         text_2 = font.render(
-            "You can change positions, velocities, masses, and dissipation coefficient of ball and load,"
-            " also you can change spring constant and acceleration of the free fall.",
+            "You can change positions, velocities, masses, and dissipation coefficients of the ball and the load,",
             True,
             WHITE
         )
         text_3 = font.render(
-            "Besides changing in menu you can change position of ball with holding left click.",
+            "Besides changing in menu you can change position of the ball with holding left click.",
             True,
             WHITE
         )
         text_4 = font.render(
-            "You can drop variables to their defaults with right click (works both in the menu and not in the menu).",
+            "You can reset variables to their defaults with right click (works both inside the menu and outside).",
             True,
             WHITE
         )
         text_15 = font.render(
-            "You can enter and quit the menu by pressing TAB and you can close the simulator by pressing ESQ.",
+            "You can enter and quit the menu by pressing TAB and you can close the simulator by pressing ESC.",
+            True,
+            WHITE
+        )
+        text_16 = font.render(
+            " also you can change spring constant and the acceleration of the free fall.",
             True,
             WHITE
         )
 
         text_5 = font.render("h: vertical displacement of the load.", True, WHITE)
-        text_6 = font.render("a: angular displacement of the pendulum (in angle)", True, WHITE)
+        text_6 = font.render("a: angular displacement of the pendulum (in degrees)", True, WHITE)
         text_7 = font.render("dh: derivative of h.", True, WHITE)
         text_8 = font.render("da: derivative of a.", True, WHITE)
         text_9 = font.render("k: the spring constant divided by the mass of the ball.", True, WHITE)
@@ -438,9 +442,10 @@ class Menu:
 
         screen.blit(text_1, text_1.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30)))
         screen.blit(text_2, text_2.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 25)))
-        screen.blit(text_3, text_3.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 50)))
-        screen.blit(text_4, text_4.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 75)))
-        screen.blit(text_15, text_15.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 100)))
+        screen.blit(text_16, text_16.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 50)))
+        screen.blit(text_3, text_3.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 75)))
+        screen.blit(text_4, text_4.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 100)))
+        screen.blit(text_15, text_15.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 125)))
 
         screen.blit(text_5, (SCREEN_X // 7, SCREEN_Y // 3))
         screen.blit(text_6, (SCREEN_X // 7, SCREEN_Y // 3 + 20))
@@ -456,7 +461,7 @@ class Menu:
 
 if __name__ == "__main__":
     try:
-        game = Simulator()
-        game.mainloop()
+        simulator = Simulator()
+        simulator.mainloop()
     finally:
         pygame.quit()
