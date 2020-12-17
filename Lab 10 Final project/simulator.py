@@ -98,22 +98,22 @@ class Simulator:
                 if menu_is_open and self.menu.down_buttons_check(event.pos[0], event.pos[1]):
                     if self.menu.down_window_number == 1:
                         self.pendulum.h -= 5 / 30
-                    elif self.menu.down_window_number == 2:
+                    elif self.menu.down_window_number == 2 :
                         self.pendulum.a -= pi / 18 / 150
                     elif self.menu.down_window_number == 3:
                         self.pendulum.dh -= 0.5 / 75
                     elif self.menu.down_window_number == 4:
                         self.pendulum.da -= 0.005 / 75
-                    elif self.menu.down_window_number == 5:
+                    elif self.menu.down_window_number == 5 and self.pendulum.k > 0.00015:
                         self.pendulum.k -= 0.0015 / 50
-                    elif self.menu.down_window_number == 6:
+                    elif self.menu.down_window_number == 6 and self.pendulum.length > 30:
                         self.pendulum.length -= 15 / 50
-                    elif self.menu.down_window_number == 7:
+                    elif self.menu.down_window_number == 7 and self.pendulum.m > 0.1:
                         self.pendulum.m -= 0.1 / 10
-                    elif self.menu.down_window_number == 8:
+                    elif self.menu.down_window_number == 8 and self.pendulum.g > 0.002:
                         self.pendulum.g -= 0.01 / 30
-                    elif self.menu.down_window_number == 9:
+                    elif self.menu.down_window_number == 9 and self.pendulum.b_a > 0.00001:
                         self.pendulum.b_a -= 0.0001 / 50
-                    elif self.menu.down_window_number == 10:
+                    elif self.menu.down_window_number == 10 and self.pendulum.b_h > 0.00001 :
                         self.pendulum.b_h -= 0.0001 / 50
                     self.menu.down_window_number = 0
