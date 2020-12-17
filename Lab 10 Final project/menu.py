@@ -1,18 +1,10 @@
-import time
-from math import sin, cos, asin, pi
-
 import pygame
 from pygame.draw import *
 
-from my_colors import *
+from my_variables import *
 from pendulum import *
 
 pygame.init()
-
-FPS = 60
-SCREEN_X, SCREEN_Y = 1300, 600
-GROUND_Y = 19 * SCREEN_Y // 20
-
 screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
 
 class Menu:
@@ -228,3 +220,4 @@ class Menu:
             screen.blit(TEXT_LEFT[k], (SCREEN_X // 7, SCREEN_Y // 3 + i))
             screen.blit(TEXT_RIGHT[k], (4 * SCREEN_X // 7, SCREEN_Y // 3 + i))
             k += 1
+
