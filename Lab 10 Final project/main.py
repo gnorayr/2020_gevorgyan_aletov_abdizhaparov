@@ -186,7 +186,6 @@ class Pendulum:
         self.h, self.a, self.dh, self.da, self.k = 0.0, 0.0, 0.0, 0.0, 0.01
         self.m, self.g, self.length, self.b_a, self.b_h = 2.0, 0.2, 300, 0.001, 0.001
 
-
 class PendulumGraph:
     def __init__(self, other: Pendulum):
         self._p = other
@@ -440,23 +439,19 @@ class Menu:
         text_13 = font.render("b_a: dissipation coefficient of the ball.", True, WHITE)
         text_14 = font.render("b_h: dissipation coefficient of the load.", True, WHITE)
 
-        screen.blit(text_1, text_1.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30)))
-        screen.blit(text_2, text_2.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 25)))
-        screen.blit(text_16, text_16.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 50)))
-        screen.blit(text_3, text_3.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 75)))
-        screen.blit(text_4, text_4.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 100)))
-        screen.blit(text_15, text_15.get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + 125)))
+        TEXT_CENTER = [text_1, text_2, text_16, text_3, text_4, text_15]
+        TEXT_LEFT = [text_5, text_6, text_7, text_8, text_9]
+        TEXT_RIGHT = [text_10, text_11, text_12, text_13, text_14]
 
-        screen.blit(text_5, (SCREEN_X // 7, SCREEN_Y // 3))
-        screen.blit(text_6, (SCREEN_X // 7, SCREEN_Y // 3 + 20))
-        screen.blit(text_7, (SCREEN_X // 7, SCREEN_Y // 3 + 40))
-        screen.blit(text_8, (SCREEN_X // 7, SCREEN_Y // 3 + 60))
-        screen.blit(text_9, (SCREEN_X // 7, SCREEN_Y // 3 + 80))
-        screen.blit(text_10, (4 * SCREEN_X // 7, SCREEN_Y // 3))
-        screen.blit(text_11, (4 * SCREEN_X // 7, SCREEN_Y // 3 + 20))
-        screen.blit(text_12, (4 * SCREEN_X // 7, SCREEN_Y // 3 + 40))
-        screen.blit(text_13, (4 * SCREEN_X // 7, SCREEN_Y // 3 + 60))
-        screen.blit(text_14, (4 * SCREEN_X // 7, SCREEN_Y // 3 + 80))
+        j, k = 0, 0
+        for i in range(0, 150, 25):
+            screen.blit(TEXT_CENTER[j], TEXT_CENTER[j].get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + i)))
+            j += 1
+
+        for i in range(0, 100, 20) :
+            screen.blit(TEXT_LEFT[k], (SCREEN_X // 7, SCREEN_Y // 3 + i))
+            screen.blit(TEXT_RIGHT[k], (4 * SCREEN_X // 7, SCREEN_Y // 3 + i))
+            k += 1
 
 
 if __name__ == "__main__":
