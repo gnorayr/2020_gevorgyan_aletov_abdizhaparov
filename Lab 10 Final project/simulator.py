@@ -4,19 +4,13 @@ from math import sin, cos, asin, pi
 import pygame
 from pygame.draw import *
 
-from my_colors import *
+from my_variables import *
 from pendulum import *
 from menu import *
 from pendulum_graph import *
 
 pygame.init()
-
-FPS = 60
-SCREEN_X, SCREEN_Y = 1300, 600
-GROUND_Y = 19 * SCREEN_Y // 20
-
 screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
-
 
 class Simulator:
     def __init__(self):
@@ -94,7 +88,7 @@ class Simulator:
                     elif self.menu.up_window_number == 10:
                         self.pendulum.b_h += 0.0001 / 50
                     self.menu.up_window_number = 0
-
+                    
                 if menu_is_open and self.menu.down_buttons_check(event.pos[0], event.pos[1]):
                     if self.menu.down_window_number == 1:
                         self.pendulum.h -= 5 / 30
