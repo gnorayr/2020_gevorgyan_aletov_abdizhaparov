@@ -1,9 +1,5 @@
 import pygame
 
-from my_variables import *
-from pendulum import *
-from menu import *
-from pendulum_graph import *
 from simulator import *
 
 pygame.init()
