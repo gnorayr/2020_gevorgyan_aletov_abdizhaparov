@@ -1,11 +1,7 @@
-import pygame
 from pygame.draw import *
 
-from my_variables import *
 from pendulum import *
 
-pygame.init()
-screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
 
 class Menu:
     def __init__(self, other: Pendulum):
@@ -207,17 +203,16 @@ class Menu:
         text_13 = font.render("b_a: dissipation coefficient of the ball.", True, WHITE)
         text_14 = font.render("b_h: dissipation coefficient of the load.", True, WHITE)
 
-        TEXT_CENTER = [text_1, text_2, text_16, text_3, text_4, text_15]
-        TEXT_LEFT = [text_5, text_6, text_7, text_8, text_9]
-        TEXT_RIGHT = [text_10, text_11, text_12, text_13, text_14]
+        text_center = [text_1, text_2, text_16, text_3, text_4, text_15]
+        text_left = [text_5, text_6, text_7, text_8, text_9]
+        text_right = [text_10, text_11, text_12, text_13, text_14]
 
         j, k = 0, 0
         for i in range(0, 150, 25):
-            screen.blit(TEXT_CENTER[j], TEXT_CENTER[j].get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + i)))
+            screen.blit(text_center[j], text_center[j].get_rect(center=(SCREEN_X // 2, SCREEN_Y // 30 + i)))
             j += 1
 
-        for i in range(0, 100, 20) :
-            screen.blit(TEXT_LEFT[k], (SCREEN_X // 7, SCREEN_Y // 3 + i))
-            screen.blit(TEXT_RIGHT[k], (4 * SCREEN_X // 7, SCREEN_Y // 3 + i))
+        for i in range(0, 100, 20):
+            screen.blit(text_left[k], (SCREEN_X // 7, SCREEN_Y // 3 + i))
+            screen.blit(text_right[k], (4 * SCREEN_X // 7, SCREEN_Y // 3 + i))
             k += 1
-

@@ -1,9 +1,4 @@
-import pygame
-
 from simulator import *
-
-pygame.init()
-screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
 
 if __name__ == "__main__":
     try:
@@ -12,4 +7,3 @@ if __name__ == "__main__":
         
     finally:
         pygame.quit()
-

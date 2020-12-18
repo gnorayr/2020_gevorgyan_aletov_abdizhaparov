@@ -5,6 +5,7 @@ import pygame
 
 from my_variables import *
 
+
 class Pendulum:
     def __init__(self, h, a, dh, da, k=10.0, length=30.0, m=1.0, g=10.0, b_a=10.0, b_h=10.0):
         """

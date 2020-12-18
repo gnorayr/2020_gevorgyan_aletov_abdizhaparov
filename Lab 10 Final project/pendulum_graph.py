@@ -1,11 +1,7 @@
-import pygame
 from pygame.draw import *
 
-from my_variables import *
 from pendulum import *
 
-pygame.init()
-screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y))
 
 class PendulumGraph:
     def __init__(self, other: Pendulum):

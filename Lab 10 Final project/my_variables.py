@@ -1,3 +1,5 @@
+from pygame.display import *
+
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
@@ -11,3 +13,5 @@ GREY = (35, 36, 38)
 
 FPS = 60
 SCREEN_X, SCREEN_Y = 1300, 600
+
+screen = set_mode((SCREEN_X, SCREEN_Y))
